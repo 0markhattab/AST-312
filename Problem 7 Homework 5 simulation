@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Apr  4 06:01:45 2023
+
+@author: omarkhattab
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+from mpl_toolkits.mplot3d import Axes3D
+
+
+Io_orbit_radius = 6 
+atom_radii = np.array([2, 4, 6, 8, 10, 12])
+T_Io = 1  
+num_cloud_points = 200
+
+
+def theta_ratio(r, r_Io=Io_orbit_radius):
+    return (r_Io / r) ** 0.5
+
+fig = plt.figure(figsize=(8, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+
+ax.set_xlabel("X")
+ax.set_ylabel("Y")
+ax.set_zlabel("Time")
+ax.set_title("Positions of Atoms Relative to Io's Orbit with Cloud", y=1.1, fontsize=16)
+
+cloud_offsets = np.random.uniform(-0.3, 0.3, size=(len(atom_radii), num_cloud_points, 3))
+
+def update(t):
+    ax.clear()
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Time")
+    ax.set_title("Positions of Atoms Relative to Io's Orbit with Cloud", y=1.1, fontsize=16)
+
+    theta_t = theta_ratio(atom_radii) * (2 * np.pi * (t / T_Io))
+    x = atom_radii * np.cos(theta_t)
+    y = atom_radii * np.sin(theta_t)
+    z = np.full(atom_radii.shape, t)
+    
+    for i in range(len(atom_radii)):
+    
+        cloud_x = x[i] + cloud_offsets[i, :, 0]
+        cloud_y = y[i] + cloud_offsets[i, :, 1]
+        cloud_z = z[i] + cloud_offsets[i, :, 2]
+        
+        ax.scatter(cloud_x, cloud_y, cloud_z, marker='.', color='gray', alpha=0.2)
+
+   
+    ax.scatter(x, y, z, marker='o', color='blue', s=50)
+
+    return ax,
+
+
+ani = FuncAnimation(fig, update, frames=np.linspace(0, T_Io, 100), blit=False)
+
+
+plt.show()
